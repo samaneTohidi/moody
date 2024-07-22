@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "451529797130",
+    "project_id": "moody-4f3e0",
+    "storage_bucket": "moody-4f3e0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:451529797130:android:fcd1cc8ed80705dfe3f9f3",
+        "android_client_info": {
+          "package_name": "com.samano.moody"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGnsddze9nRTv56_QXZwRiCh9FQelIlCI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
