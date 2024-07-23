@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moody/screens/seek_bar_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,11 +20,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
 
-      home:  Scaffold(
-        appBar: AppBar(
-          title:  const Text('SAM'),
-        ),
-      ),
+      home:  const SeekBarScreen()
     );
   }
 }
