@@ -19,7 +19,11 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
 
-      home: const Scaffold(),
+      home:  Scaffold(
+        appBar: AppBar(
+          title:  const Text('SAM'),
+        ),
+      ),
     );
   }
 }
