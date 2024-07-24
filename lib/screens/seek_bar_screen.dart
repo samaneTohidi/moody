@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,6 +12,7 @@ class SeekBarScreen extends StatefulWidget {
 
 class _SeekBarScreenState extends State<SeekBarScreen> {
   double _currentValue = 0;
+  final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
 
   final List<String> _emotions = [
     '😡', // Very Unhappy
@@ -38,6 +40,11 @@ class _SeekBarScreenState extends State<SeekBarScreen> {
     _loadCurrentValue();
   }
 
+  @override
+  void dispose() {
+    _logCurrentValue();
+    super.dispose();
+  }
   _loadCurrentValue() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -48,6 +55,16 @@ class _SeekBarScreenState extends State<SeekBarScreen> {
   _saveCurrentValue(double value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setDouble('seekBarValue', value);
+  }
+
+  _logCurrentValue() async {
+    await _analytics.logEvent(
+      name: 'seek_bar_value',
+      parameters: <String, Object>{
+        'value': _currentValue,
+        'emotion': _emotions[_currentValue.round()],
+      },
+    );
   }
 
   @override
@@ -132,7 +149,7 @@ class _SeekBarScreenState extends State<SeekBarScreen> {
 class LightningThumbShape extends SliderComponentShape {
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return const Size(48, 48); 
+    return const Size(48, 48);
   }
 
   @override
