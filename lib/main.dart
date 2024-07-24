@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:moody/screens/auth_screen.dart';
 import 'package:moody/screens/seek_bar_screen.dart';
 import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'firebase_options.dart';
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
 
-      home:  const SeekBarScreen()
+      home:  AuthScreen()
     );
   }
 }
