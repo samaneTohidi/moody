@@ -22,22 +22,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
     } catch (e) {
       // Handle registration error
-      print('Registration failed: $e');
+      _showErrorMessage(context, e.toString());
     }
+  }
+  void _showErrorMessage(BuildContext context, String errorMessage) {
+    final snackBar = SnackBar(
+      content: Text('Registration failed: $errorMessage'),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Register')),
+      appBar: AppBar(title: const Text('Register')),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: const InputDecoration(labelText: 'Email'),
                 onChanged: (value) {
                   _email = value;
                 },
@@ -49,7 +55,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 },
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
                 onChanged: (value) {
                   _password = value;
@@ -61,14 +67,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _register();
                   }
                 },
-                child: Text('Register'),
+                child: const Text('Register'),
               ),
             ],
           ),

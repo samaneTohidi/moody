@@ -74,7 +74,8 @@ class _SeekBarScreenState extends State<SeekBarScreen> {
         title: const Text('Emotion Slider'),
       ),
       body: Center(
-        child: Column(
+        child:
+        Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Stack(
