@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "451529797130",
+    "firebase_url": "https://moody-4f3e0-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "moody-4f3e0",
     "storage_bucket": "moody-4f3e0.appspot.com"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.samano.moody"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "451529797130-bvl1sqnrr8b96ejiv6eia79eorqbflug.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.samano.moody",
+            "certificate_hash": "f14bd1ab588e9375fd47d74b0eb53a4f9f098270"
+          }
+        },
+        {
+          "client_id": "451529797130-iqn6nnm27boujo3hjh2fluq1dimbm2re.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAGnsddze9nRTv56_QXZwRiCh9FQelIlCI"
@@ -20,7 +34,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "451529797130-iqn6nnm27boujo3hjh2fluq1dimbm2re.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "451529797130-h0sf3mc2viogn2fi32ta9fhqct3o3jfc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.samano.moody"
+              }
+            }
+          ]
         }
       }
     }
