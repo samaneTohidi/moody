@@ -10,8 +10,14 @@ class SearchUserScreen extends StatefulWidget {
 class _SearchUserScreenState extends State<SearchUserScreen> {
   String _searchQuery = '';
   List<DocumentSnapshot> _searchResults = [];
+  bool _isLoading = false;
 
   Future<void> _searchUsers() async {
+    setState(() {
+      _isLoading = true;
+      _searchResults = [];
+    });
+
     final querySnapshot = await FirebaseFirestore.instance
         .collection('users')
         .where('email', isEqualTo: _searchQuery)
@@ -19,6 +25,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
 
     setState(() {
       _searchResults = querySnapshot.docs;
+      _isLoading = false;
     });
   }
 
@@ -45,7 +52,11 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
               },
             ),
             Expanded(
-              child: ListView.builder(
+              child: _isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : _searchResults.isEmpty
+                  ? Center(child: Text('No results found'))
+                  : ListView.builder(
                 itemCount: _searchResults.length,
                 itemBuilder: (context, index) {
                   final user = _searchResults[index];
