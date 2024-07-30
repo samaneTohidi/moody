@@ -2,6 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:moody/screens/follower_scren.dart';
+import 'package:moody/screens/search_user_screen.dart';
+
+
 
 class HomeScreen extends StatefulWidget {
   final User user;
@@ -12,7 +16,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   double _currentValue = 0;
 
   final List<String> _emotions = ['😡', '😟', '😕', '😐', '🙂', '😊', '😄'];
@@ -32,12 +37,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
     _loadUserEmotionalStatus();
   }
 
   Future<void> _loadUserEmotionalStatus() async {
     final userDoc =
-        FirebaseFirestore.instance.collection('users').doc(widget.user.uid);
+    FirebaseFirestore.instance.collection('users').doc(widget.user.uid);
     final docSnapshot = await userDoc.get();
     if (docSnapshot.exists) {
       final emotionalStatus = docSnapshot.data()?['emotionalStatus'] ?? '🙂';
@@ -55,11 +61,50 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _updateUserProfile(String emotion) async {
     final userDoc =
-        FirebaseFirestore.instance.collection('users').doc(widget.user.uid);
+    FirebaseFirestore.instance.collection('users').doc(widget.user.uid);
     userDoc.update({
       'emotionalStatus': emotion,
       'updatedAt': Timestamp.now(),
     });
+
+    final statusUpdateDoc =
+    FirebaseFirestore.instance.collection('EmotionalStatusUpdates').doc();
+    statusUpdateDoc.set({
+      'user_id': widget.user.uid,
+      'emotional_status': emotion,
+      'created_at': Timestamp.now(),
+    });
+
+    _notifyFollowers(widget.user.uid, emotion);
+  }
+
+  Future<void> _notifyFollowers(String userId, String emotion) async {
+    final followersQuery = await FirebaseFirestore.instance
+        .collection('followers')
+        .where('user_id', isEqualTo: userId)
+        .get();
+
+    for (var doc in followersQuery.docs) {
+      final followerId = doc['follower_user_id'];
+      final notificationDoc =
+      FirebaseFirestore.instance.collection('notifications').doc();
+      notificationDoc.set({
+        'user_id': followerId,
+        'from_user_id': userId,
+        'notification_type': 'status_update',
+        'emotional_status': emotion,
+        'created_at': Timestamp.now(),
+      });
+
+      // Send notification via FCM (requires FCM setup and integration)
+      // await FirebaseMessaging.instance.sendMessage(
+      //   to: followerId,
+      //   data: {
+      //     'title': 'Emotional Status Update',
+      //     'body': 'User $userId has updated their status to $emotion',
+      //   },
+      // );
+    }
   }
 
   @override
@@ -70,7 +115,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        title: Text('Home'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'Emotions'),
+            Tab(text: 'Followers'),
+            Tab(text: 'Following'),
+          ],
+        ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SearchUserScreen(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
@@ -100,15 +165,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               );
             },
-          )
+          ),
         ],
-        automaticallyImplyLeading: false,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Column(
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          Center(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Stack(
@@ -177,8 +241,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          FollowersList(userId: widget.user.uid),
+          FollowingList(userId: widget.user.uid),
+        ],
       ),
     );
   }
@@ -227,5 +293,106 @@ class LightningThumbShape extends SliderComponentShape {
 
     canvas.drawPath(path, fillPaint);
     canvas.drawPath(path, borderPaint);
+  }
+}
+
+class FollowersList extends StatelessWidget {
+  final String userId;
+
+  const FollowersList({required this.userId, Key? key}) : super(key: key);
+
+  Future<List<Map<String, dynamic>>> _getFollowersDetails() async {
+    final followersSnapshots = await FirebaseFirestore.instance
+        .collection('followers')
+        .where('user_id', isEqualTo: userId)
+        .get();
+
+    List<Map<String, dynamic>> followersDetails = [];
+
+    for (var doc in followersSnapshots.docs) {
+      final followerUserId = doc['follower_user_id'];
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(followerUserId).get();
+
+      if (userDoc.exists) {
+        followersDetails.add({
+          'email': userDoc['email'],
+          'emotionalStatus': userDoc['emotionalStatus'],
+        });
+      }
+    }
+
+    return followersDetails;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _getFollowersDetails(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+        return ListView.builder(
+          itemCount: snapshot.data?.length ?? 0,
+          itemBuilder: (context, index) {
+            final followerData = snapshot.data?[index];
+            return ListTile(
+              title: Text(followerData?['email'] ?? 'Unknown'),
+              subtitle: Text(followerData?['emotionalStatus'] ?? 'Unknown'),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+class FollowingList extends StatelessWidget {
+  final String userId;
+
+  const FollowingList({required this.userId, Key? key}) : super(key: key);
+
+  Future<List<Map<String, dynamic>>> _getFollowingDetails() async {
+    final followingSnapshots = await FirebaseFirestore.instance
+        .collection('followers')
+        .where('follower_user_id', isEqualTo: userId)
+        .get();
+
+    List<Map<String, dynamic>> followingDetails = [];
+
+    for (var doc in followingSnapshots.docs) {
+      final followingUserId = doc['user_id'];
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(followingUserId).get();
+
+      if (userDoc.exists) {
+        followingDetails.add({
+          'email': userDoc['email'],
+          'emotionalStatus': userDoc['emotionalStatus'],
+        });
+      }
+    }
+
+    return followingDetails;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _getFollowingDetails(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+        return ListView.builder(
+          itemCount: snapshot.data?.length ?? 0,
+          itemBuilder: (context, index) {
+            final followingData = snapshot.data?[index];
+            return ListTile(
+              title: Text(followingData?['email'] ?? 'Unknown'),
+              subtitle: Text(followingData?['emotionalStatus'] ?? 'Unknown'),
+            );
+          },
+        );
+      },
+    );
   }
 }
