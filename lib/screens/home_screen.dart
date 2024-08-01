@@ -4,6 +4,9 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:moody/screens/search_user_screen.dart';
 
+import '../models/emotional_status_update_model.dart';
+import '../models/notification_model.dart';
+
 
 
 class HomeScreen extends StatefulWidget {
@@ -61,18 +64,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Future<void> _updateUserProfile(String emotion) async {
     final userDoc =
     FirebaseFirestore.instance.collection('users').doc(widget.user.uid);
-    userDoc.update({
+    await userDoc.update({
       'emotionalStatus': emotion,
       'updatedAt': Timestamp.now(),
     });
 
-    final statusUpdateDoc =
-    FirebaseFirestore.instance.collection('EmotionalStatusUpdates').doc();
-    statusUpdateDoc.set({
-      'user_id': widget.user.uid,
-      'emotional_status': emotion,
-      'created_at': Timestamp.now(),
-    });
+    final statusUpdateDoc = FirebaseFirestore.instance.collection('EmotionalStatusUpdates').doc();
+    final statusUpdate = EmotionalStatusUpdateModel(
+      updateId: statusUpdateDoc.id,
+      userId: widget.user.uid,
+      emotionalStatus: emotion,
+      createdAt: Timestamp.now(),
+    );
+
+    await statusUpdateDoc.set(statusUpdate.toJson());
 
     _notifyFollowers(widget.user.uid, emotion);
   }
@@ -85,15 +90,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
     for (var doc in followersQuery.docs) {
       final followerId = doc['follower_user_id'];
-      final notificationDoc =
-      FirebaseFirestore.instance.collection('notifications').doc();
-      notificationDoc.set({
-        'user_id': followerId,
-        'from_user_id': userId,
-        'notification_type': 'status_update',
-        'emotional_status': emotion,
-        'created_at': Timestamp.now(),
-      });
+      final notificationDoc = FirebaseFirestore.instance.collection('notifications').doc();
+      final notification = NotificationModel(
+        notificationId: notificationDoc.id,
+        userId: followerId,
+        fromUserId: userId,
+        notificationType: 'status_update',
+        createdAt: Timestamp.now(),
+      );
+      await notificationDoc.set(notification.toJson());
+
 
       // Send notification via FCM (requires FCM setup and integration)
       // await FirebaseMessaging.instance.sendMessage(
