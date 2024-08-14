@@ -46,10 +46,10 @@ class AuthGate extends StatelessWidget {
               headerBuilder: (context, constraints, shrinkOffset) {
                 return Padding(
                   padding: const EdgeInsets.all(20),
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Image.asset('flutterfire_300x.png'),
-                  ),
+                  // child: AspectRatio(
+                  //   aspectRatio: 1,
+                  //   child: Image.asset('flutterfire_300x.png'),
+                  // ),
                 );
               },
               subtitleBuilder: (context, action) {
@@ -72,10 +72,10 @@ class AuthGate extends StatelessWidget {
               sideBuilder: (context, shrinkOffset) {
                 return Padding(
                   padding: const EdgeInsets.all(20),
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Image.asset('flutterfire_300x.png'),
-                  ),
+                  // child: AspectRatio(
+                  //   aspectRatio: 1,
+                  //   child: Image.asset('flutterfire_300x.png'),
+                  // ),
                 );
               },
             );

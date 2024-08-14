@@ -281,10 +281,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       const Divider(),
                       Padding(
                         padding: const EdgeInsets.all(2),
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: Image.asset('flutterfire_300x.png'),
-                        ),
+                        // child: AspectRatio(
+                        //   aspectRatio: 1,
+                        //   child: Image.asset('flutterfire_300x.png'),
+                        // ),
                       ),
                     ],
                   ),
