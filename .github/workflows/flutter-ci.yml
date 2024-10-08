@@ -1,0 +1,58 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches:
+      - main  # Trigger workflow on push events to the 'main' branch
+  pull_request:
+    branches:
+      - main  # Trigger workflow on pull requests targeting the 'main' branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu as the runner environment
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3  # Check out the repository's code so the workflow can access it
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.1'  # Install Flutter version 3.22.1 to use in the workflow
+
+      - name: Cache Flutter pub dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.pub-cache  # Cache Flutter dependencies to reduce time on repeated runs
+          key: ${{ runner.os }}-flutter-${{ hashFiles('pubspec.yaml') }}  # Use OS and pubspec.yaml hash as cache key
+          restore-keys: |
+            ${{ runner.os }}-flutter-  # Restore from the closest cache key if an exact match isn't found
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'  # Install JDK version 8, required for Android builds
+          distribution: 'temurin'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches  # Cache Gradle dependencies to speed up the build process
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/app/build.gradle') }}  # Use OS and build.gradle hash as cache key
+          restore-keys: |
+            ${{ runner.os }}-gradle-  # Restore from the closest cache key if an exact match isn't found
+
+      - name: Create assets directory
+        run: mkdir -p assets
+
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.ENV_FILE_CONTENT }}" > assets/.env
+
+      - name: Install dependencies
+        run: flutter pub get  # Install the Flutter project's dependencies
+
+      - name: Build Debug APK
+        run: flutter build apk --debug  # Build the debug APK for Android
+
