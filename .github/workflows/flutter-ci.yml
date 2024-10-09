@@ -56,3 +56,12 @@ jobs:
       - name: Build Debug APK
         run: flutter build apk --debug  # Build the debug APK for Android
 
+      - name: Install Firebase CLI  # Firebase CLI
+        run: curl -sL https://firebase.tools | bash
+
+      - name: Upload APK to Firebase App Distribution  # Upload APK to Firebase App Distribution
+        run: |
+            firebase appdistribution:distribute build/app/outputs/flutter-apk/app-debug.apk \
+            --app "1:451529797130:android:fcd1cc8ed80705dfe3f9f3" \
+            --groups "testers" \
+            --token "${{ secrets.FIREBASE_TOKEN }}"
