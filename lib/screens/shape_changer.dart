@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
+import '../utils/pref.dart';
+import '../widgets/custom_bottom_sheet.dart';
+
 class ShapeChanger extends StatefulWidget {
   @override
   _ShapeChangerState createState() => _ShapeChangerState();
@@ -47,6 +50,33 @@ class _ShapeChangerState extends State<ShapeChanger> {
     _initialLottieFile = 'assets/json/normal.json';  // Custom initial Lottie file
     _currentColor = Colors.white;  // Custom initial color
     _sliderValue = -1;  // Set to -1 to indicate initialization state
+    _loadState();
+
+  }
+
+  Future<void> _loadState() async {
+    final state = await Pref.loadState();
+    setState(() {
+      _sliderValue = state['sliderValue'];
+      _currentColor = state['currentColor'];
+    });
+  }
+  void _showBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (BuildContext context) {
+        return CustomBottomSheet(
+          onSubmit: (String enteredText) {
+            print('$enteredText');
+            Pref.saveText(enteredText);
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -127,6 +157,7 @@ class _ShapeChangerState extends State<ShapeChanger> {
                       _sliderValue = value;
                       _currentColor = colors[value.toInt()];
                     });
+
                   },
                 ),
               )
@@ -143,13 +174,17 @@ class _ShapeChangerState extends State<ShapeChanger> {
                 ),
               ),
               onPressed: () {
-                // Define the action to be taken when the button is pressed
+                setState(() {
+                  Pref.saveState(_sliderValue, _currentColor); // Save state
+                  _showBottomSheet();
+                });
+
               },
               child: Container(
                 width: double.infinity, // Full width
                 alignment: Alignment.center,
                 child: Text(
-                  'ثبتش كن',
+                  'افزودن متن',
                   style: TextStyle(
                     fontSize: 16, // Adjust the font size as needed
                   ),

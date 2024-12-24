@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:moody/screens/auth_gate.dart';
 import 'package:firebase_core/firebase_core.dart' show Firebase;
+import 'package:moody/screens/shape_changer.dart';
 import 'firebase_options.dart';
 
 
@@ -66,7 +67,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
 
-      home:  const AuthGate()
+      home:   ShapeChanger()
     );
   }
 }
