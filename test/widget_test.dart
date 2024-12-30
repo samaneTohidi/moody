@@ -9,11 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:moody/main.dart';
+import 'package:moody/repository/mood_database.dart';
 
 void main() {
+  final moodDatabase = MoodDatabase();
+
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget( MyApp(moodDatabase: moodDatabase,));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:moody/repository/mood_database.dart';
 
-import '../utils/pref.dart';
 import '../widgets/custom_bottom_sheet.dart';
 
 class ShapeChanger extends StatefulWidget {
+  final MoodDatabase moodDatabase;
+  ShapeChanger({required this.moodDatabase});
+
   @override
   _ShapeChangerState createState() => _ShapeChangerState();
 }
@@ -12,6 +15,8 @@ class ShapeChanger extends StatefulWidget {
 class _ShapeChangerState extends State<ShapeChanger> {
   late double _sliderValue;
   late Color _currentColor;
+  late String _note;
+
   late String _initialTitle;
   late String _initialLottieFile;
   bool _isFading = false;
@@ -49,31 +54,50 @@ class _ShapeChangerState extends State<ShapeChanger> {
     _initialTitle = 'هی علی امروز چطوری؟';  // Set your custom initial title here
     _initialLottieFile = 'assets/json/normal.json';  // Custom initial Lottie file
     _currentColor = Colors.white;  // Custom initial color
-    _sliderValue = -1;  // Set to -1 to indicate initialization state
+    _sliderValue = -1;
+    _note = '';
+
     _loadState();
 
   }
 
+
   Future<void> _loadState() async {
-    final state = await Pref.loadState();
-    setState(() {
-      _sliderValue = state['sliderValue'];
-      _currentColor = state['currentColor'];
-    });
+    final state = await widget.moodDatabase.fetchLatestState();
+    if(state!=null){
+      setState(() {
+        _sliderValue = state.sliderValue;
+        _currentColor = Color(state.currentColor);
+        _note = state.note ?? '';
+
+      });}
+
   }
+
+  void _saveState(String enteredText) async {
+    await widget.moodDatabase.insertState(_sliderValue, _currentColor.value, enteredText);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('وضعیت ذخیره شد!')),
+    );
+  }
+
+
   void _showBottomSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
       ),
       builder: (BuildContext context) {
         return CustomBottomSheet(
           onSubmit: (String enteredText) {
-            print('$enteredText');
-            Pref.saveText(enteredText);
+            setState(() {
+              _note = enteredText;
+            });
+            _saveState(enteredText);
           },
+
         );
       },
     );
@@ -100,7 +124,7 @@ class _ShapeChangerState extends State<ShapeChanger> {
               textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(height: 20), // Space between the title and the shape
+          const SizedBox(height: 20), // Space between the title and the shape
 
           // Fade-in and fade-out animation for Lottie animation
           _sliderValue == -1 ? Container(
@@ -175,7 +199,6 @@ class _ShapeChangerState extends State<ShapeChanger> {
               ),
               onPressed: () {
                 setState(() {
-                  Pref.saveState(_sliderValue, _currentColor); // Save state
                   _showBottomSheet();
                 });
 

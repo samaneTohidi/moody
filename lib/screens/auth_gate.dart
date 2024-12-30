@@ -82,7 +82,7 @@ class AuthGate extends StatelessWidget {
             );
           } else {
             _createUserInFirestore(user);
-            return ShapeChanger();
+            return CircularProgressIndicator();
           }
         }
         return const CircularProgressIndicator();

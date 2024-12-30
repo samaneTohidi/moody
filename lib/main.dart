@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:moody/repository/mood_database.dart';
 import 'package:moody/screens/auth_gate.dart';
 import 'package:firebase_core/firebase_core.dart' show Firebase;
 import 'package:moody/screens/shape_changer.dart';
@@ -18,6 +19,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final moodDatabase = MoodDatabase();
 
   try {
     await dotenv.load(fileName: "assets/.env");
@@ -49,12 +51,14 @@ void main() async {
       .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
 
-  runApp(const MyApp());
+  runApp( MyApp(moodDatabase: moodDatabase));
 }
 
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final MoodDatabase moodDatabase;
+
+  MyApp({required this.moodDatabase});
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +71,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
 
-      home:   ShapeChanger()
+      home:   ShapeChanger(moodDatabase: moodDatabase)
     );
   }
 }
